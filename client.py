@@ -1,25 +1,46 @@
+from flask import Flask, jsonify
 import requests
 
-# L'URL de votre API FastAPI
-api_url = "http://127.0.0.1:8000"
+app = Flask(__name__)
 
-# Fonction pour consommer l'endpoint "/"
-def consume_index():
-    response = requests.get(f"{api_url}/")
-    if response.status_code == 200:
-        print(f"Réponse de l'API / : {response.text}")
-    else:
-        print(f"Erreur {response.status_code} lors de la requête sur /")
+# URL de l'API FastAPI déployée sur l'instance EC2
+API_URL = "http://<i-0f2809662e41c4b2d>//"
 
-# Fonction pour consommer l'endpoint "/test"
-def consume_test():
-    response = requests.get(f"{api_url}/test")
-    if response.status_code == 200:
-        print(f"Réponse de l'API /test : {response.text}")
-    else:
-        print(f"Erreur {response.status_code} lors de la requête sur /test")
+@app.route("/")
 
-# Consommer les deux endpoints
+def home():
+    """Consomme l'endpoint / de l'API FastAPI."""
+    try:
+        response = requests.get(f"{API_URL}")
+        response.raise_for_status()
+        return jsonify({"message": "Données récupérées avec succès", "data": response.text})
+    except requests.exceptions.RequestException as e:
+        return jsonify({"error": "Impossible de récupérer les données","details": str(e)}), 500
+
+@app.route("/get-test", methods=["GET"])
+
+def get_test():
+    """Consomme l'endpoint /test de l'API FastAPI."""
+    try:
+        response = requests.get(f"{API_URL}test")
+        response.raise_for_status()
+        return jsonify({"message": "Données récupérées avec succès", "data": response.text})
+    except requests.exceptions.RequestException as e:
+        return jsonify({"error": "Impossible de récupérer les données","details": str(e)}), 500
+
 if __name__ == "__main__":
-    consume_index()
-    consume_test()
+    app.run(debug=True, host="0.0.0.0", port=5000)
+    
+def get_test():
+    """Consomme l'endpoint /test de l'API FastAPI."""
+    try:
+        response = requests.get(f"{API_URL}test")
+        response.raise_for_status()
+        return jsonify({"message": "Données récupérées avec succès",
+        "data": response.text})
+    except requests.exceptions.RequestException as e:
+        return jsonify({"error": "Impossible de récupérer les données",
+        "details": str(e)}), 500
+
+if __name__ == "__main__":
+    app.run(debug=True, host="0.0.0.0", port=5000)
